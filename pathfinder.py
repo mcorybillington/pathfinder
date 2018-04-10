@@ -17,7 +17,7 @@ def ip_lookup(ip):
     return country, city, state, zip_code, latitude, longitude
 
 
-def print_results(hops, reply, city, state, zip_code, lat, long, country):
+def print_results(hops, reply, city, state, zip_code, lat, lon, country):
     output = ('{:<2}''{:^12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
               ).format(hops, "hops away:",
                        info(reply),
@@ -25,7 +25,7 @@ def print_results(hops, reply, city, state, zip_code, lat, long, country):
                        info(state),
                        info(zip_code),
                        info(lat),
-                       info(long),
+                       info(lon),
                        info(country)
                        )
     print(output)
