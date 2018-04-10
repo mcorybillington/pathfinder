@@ -8,14 +8,8 @@ $ sudo python3 pathfinder.py
 Requires:
 ```
 scapy
-```
-```
 ipaddress
-```
-```
 urllib3
-```
-```
 json
 ```
 
