@@ -19,9 +19,15 @@ def ip_lookup(ip):
 
 def print_results(hops, reply, city, state, zip_code, lat, long, country):
     output = ('{:<2}''{:^12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
-              ).format(hops, "hops away:", reply if reply else '', city if city else ''
-                       , state if state else '', zip_code if zip_code else '', lat if lat else ''
-                       , long if long else '', country if country else '')
+              ).format(hops, "hops away:",
+                       info(reply),
+                       info(city),
+                       info(state),
+                       info(zip_code),
+                       info(lat),
+                       info(long),
+                       info(country)
+                       )
     print(output)
 
 
@@ -47,6 +53,11 @@ def trace_route(hostname):
             else:
                 country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
                 print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
+
+
+def info(n):
+    answer = n if n else ''
+    return answer
 
 
 def main():
