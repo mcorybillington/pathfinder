@@ -1,5 +1,6 @@
+import os
 import socket
-from scapy.layers.inet import IP, UDP
+from scapy.layers.inet import IP, UDP, ICMP
 from scapy.sendrecv import sr1
 import ipaddress
 import requests
@@ -11,8 +12,8 @@ def ip_lookup(ip):
     data_list = url_request.json()
     country = str(data_list['country'])
     city = str(data_list['city'])
-    state = str(data_list['region_name'])
-    zip_code = str(data_list['zip_code'])
+    state = str(data_list['regionName'])
+    zip_code = str(data_list['zip'])
     latitude = str(data_list['lat'])
     longitude = str(data_list['lon'])
     return country, city, state, zip_code, latitude, longitude
@@ -40,26 +41,20 @@ def trace_route(hostname):
               ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LONG", "COUNTRY")
     print('\n', header)
     for i in range(1, 28):
-        pkt = IP(dst=ip, ttl=i) / UDP(dport=33434)
-        print("sent")
-        reply = sr1(pkt, verbose=0)
-        print("received")
+        reply = sr1(IP(dst=sys.argv[1], ttl=i) / ICMP(id=os.getpid()), verbose=0)
         if reply is None:
-            print("noreply")
+            print("No Reply")
             break
-        elif reply.type == 3:
+        elif ipaddress.ip_address(reply.src).is_private:
+            priv = "Priv IP"
+            print_results(i, reply.src, priv, priv, priv, priv, priv, priv)
+        elif reply.src == ip:
             country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
             print('\n', "We're here!", '\n', end=' ', flush=True)
             print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
-            break
         else:
-            ipaddress.ip_address(reply.src)
-            if ipaddress.ip_address(reply.src).is_private:
-                priv = "Priv IP"
-                print_results(i, reply.src, priv, priv, priv, priv, priv, priv)
-            else:
-                country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
-                print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
+            country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
+            print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
 
 
 def info(n):
