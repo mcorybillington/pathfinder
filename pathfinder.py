@@ -1,20 +1,18 @@
 from scapy.layers.inet import IP, UDP
 from scapy.sendrecv import sr1
 import ipaddress
-import urllib3
-import json
+import requests
 
 
 def ip_lookup(ip):
-    http = urllib3.PoolManager()
-    url_request = http.request('GET', 'http://freegeoip.net/json/'+ip)
-    data_list = json.loads(url_request.data.decode('utf-8'))
-    country = str(data_list['country_name'])
+    url_request = requests.get('GET', 'http://ip-api.com/json'+ip)
+    data_list = url_request.json()
+    country = str(data_list['country'])
     city = str(data_list['city'])
     state = str(data_list['region_name'])
     zip_code = str(data_list['zip_code'])
-    latitude = str(data_list['latitude'])
-    longitude = str(data_list['longitude'])
+    latitude = str(data_list['lat'])
+    longitude = str(data_list['lon'])
     return country, city, state, zip_code, latitude, longitude
 
 
@@ -40,6 +38,7 @@ def trace_route(hostname):
         pkt = IP(dst=hostname, ttl=i) / UDP(dport=33434)
         reply = sr1(pkt, verbose=0)
         if reply is None:
+            print("noreply")
             break
         elif reply.type == 3:
             country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
