@@ -1,11 +1,13 @@
+import socket
 from scapy.layers.inet import IP, UDP
 from scapy.sendrecv import sr1
 import ipaddress
 import requests
+import sys
 
 
 def ip_lookup(ip):
-    url_request = requests.get('GET', 'http://ip-api.com/json'+ip)
+    url_request = requests.get('http://ip-api.com/json/'+ip)
     data_list = url_request.json()
     country = str(data_list['country'])
     city = str(data_list['city'])
@@ -31,12 +33,17 @@ def print_results(hops, reply, city, state, zip_code, lat, lon, country):
 
 
 def trace_route(hostname):
+    ip = str(socket.gethostbyname(hostname))
+    print(hostname)
+    print("IP ", ip)
     header = ('{:<2}''{:<12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
               ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LONG", "COUNTRY")
     print('\n', header)
     for i in range(1, 28):
-        pkt = IP(dst=hostname, ttl=i) / UDP(dport=33434)
+        pkt = IP(dst=ip, ttl=i) / UDP(dport=33434)
+        print("sent")
         reply = sr1(pkt, verbose=0)
+        print("received")
         if reply is None:
             print("noreply")
             break
@@ -60,10 +67,9 @@ def info(n):
     return answer
 
 
-def main():
-    destination = input("Where are we headed...? ")
-    trace_route(destination)
+def main(ip_arg):
+    trace_route(ip_arg)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
