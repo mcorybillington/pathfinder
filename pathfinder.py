@@ -1,35 +1,39 @@
 import os
+import sys
 import socket
-from scapy.layers.inet import IP, UDP, ICMP
-from scapy.sendrecv import sr1
 import ipaddress
 import requests
-import sys
+from scapy.layers.inet import IP, ICMP
+from scapy.sendrecv import sr1
 
 
 def ip_lookup(ip):
-    url_request = requests.get('http://ip-api.com/json/'+ip)
+    url_request = requests.get('http://ip-api.com/json/' + ip)
     data_list = url_request.json()
-    country = str(data_list['country'])
-    city = str(data_list['city'])
-    state = str(data_list['regionName'])
-    zip_code = str(data_list['zip'])
-    latitude = str(data_list['lat'])
-    longitude = str(data_list['lon'])
-    return country, city, state, zip_code, latitude, longitude
+    params = {'country': str(data_list['country']),
+              'city': str(data_list['city']),
+              'state': str(data_list['regionName']),
+              'zip': str(data_list['zip']),
+              'lat': str(data_list['lat']),
+              'lon': str(data_list['lon'])}
+    return params
 
 
-def print_results(hops, reply, city, state, zip_code, lat, lon, country):
-    output = ('{:<2}''{:^12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
-              ).format(hops, "hops away:",
-                       info(reply),
-                       info(city),
-                       info(state),
-                       info(zip_code),
-                       info(lat),
-                       info(lon),
-                       info(country)
-                       )
+def print_results(hops, reply, input_dict):
+    try:
+        output = ('{:<2}''{:^12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
+                  ).format(hops, "hops away:",
+                           info(reply),
+                           info(input_dict['city']),
+                           info(input_dict['state']),
+                           info(input_dict['zip']),
+                           info(input_dict['lat']),
+                           info(input_dict['lon']),
+                           info(input_dict['country'])
+                           )
+    except TypeError:
+        priv_ip = input_dict
+        output = '{:<2}''{:^12}''{:<18}'.format(hops, reply, priv_ip)
     print(output)
 
 
@@ -47,19 +51,18 @@ def trace_route(hostname):
             break
         elif ipaddress.ip_address(reply.src).is_private:
             priv = "Priv IP"
-            print_results(i, reply.src, priv, priv, priv, priv, priv, priv)
+            print_results(i, reply.src, priv)
         elif reply.src == ip:
-            country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
+            params = ip_lookup(reply.src)
             print('\n', "We're here!", '\n', end=' ', flush=True)
-            print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
+            print_results(i, reply.src, params)
         else:
-            country, city, state, zip_code, latitude, longitude = ip_lookup(reply.src)
-            print_results(i, reply.src, city, state, zip_code, latitude, longitude, country)
+            params = ip_lookup(reply.src)
+            print_results(i, reply.src, params)
 
 
 def info(n):
-    answer = n if n else ''
-    return answer
+    return n if n else ''
 
 
 def main(ip_arg):
