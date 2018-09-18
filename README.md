@@ -6,7 +6,11 @@ task without elevated privileges, so if you have any ideas, please submit them! 
 
 To run:
 ```
-$ sudo python3 pathfinder.py
+$ sudo python3 pathfinder.py [hostname]
+```
+example:
+```
+$ sudo python3 pathfinder.py www.google.com
 ```
 Requires:
 ```
