@@ -1,4 +1,5 @@
-from scapy.all import *
+from scapy.layers.inet import IP, UDP
+from scapy.sendrecv import sr1
 import ipaddress
 import urllib3
 import json
@@ -34,7 +35,7 @@ def print_results(hops, reply, city, state, zip_code, lat, lon, country):
 def trace_route(hostname):
     header = ('{:<2}''{:<12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
               ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LONG", "COUNTRY")
-    print('\n',header)
+    print('\n', header)
     for i in range(1, 28):
         pkt = IP(dst=hostname, ttl=i) / UDP(dport=33434)
         reply = sr1(pkt, verbose=0)
