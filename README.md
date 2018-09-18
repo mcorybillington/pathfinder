@@ -20,7 +20,6 @@ urllib3
 Uses from standard library:
 ```
 ipaddress
-json
 ```
 
 Sample output:
