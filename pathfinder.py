@@ -28,7 +28,7 @@ def ip_lookup(ip):
 
 def print_results(hops, reply, input_dict):
     try:
-        output = ('{:<2}' '{:^12}' '{:<18}' '{:<15}' '{:<14}' '{:<13}' '{:<10}' '{:<12}' '{:<14}'
+        output = ('{:<4}{:^12} {:<18}  {:<15} {:<14} {:<13} {:<10} {:<12} {:<14}'
                   ).format(hops, "hops away:",
                            info(reply),
                            info(input_dict['city']),
@@ -40,7 +40,7 @@ def print_results(hops, reply, input_dict):
                            )
     except TypeError:
         priv_ip = input_dict
-        output = '{:<2}''{:^12}''{:<18}'.format(hops, reply, priv_ip)
+        output = '{:<2} {:^12} {:<18}'.format(hops, reply, priv_ip)
     print(output)
 
 
@@ -48,8 +48,8 @@ def trace_route(hostname):
     ip = str(socket.gethostbyname(hostname))
     print(hostname)
     print("IP ", ip)
-    header = ('{:<2}''{:<12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
-              ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LON", "COUNTRY")
+    header = '{:<2} {:<12} {:<18} {:<15} {:<14} {:<13} {:<10} {:<12} {:<14}' \
+        .format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LON", "COUNTRY")
     print('\n', header)
     for i in range(1, 28):
         reply = sr1(IP(dst=sys.argv[1], ttl=i) / ICMP(id=os.getpid()), verbose=0)
