@@ -57,12 +57,12 @@ def trace_route(hostname):
             print("No Reply")
             break
         elif reply.src == ip:
-            params = ip_lookup(reply.src) if not ipaddress.ip_address(reply.src) else "Priv IP"
+            params = ip_lookup(reply.src) if not ipaddress.ip_address(reply.src) else "PRIV IP"
             print('\n', "We're here!", '\n', end=' ', flush=True)
             print_results(i, reply.src, params)
             break
         elif ipaddress.ip_address(reply.src).is_private:
-            priv = "Priv IP"
+            priv = "PRIV IP"
             print_results(i, reply.src, priv)
         else:
             params = ip_lookup(reply.src)
