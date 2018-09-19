@@ -3,8 +3,15 @@ import sys
 import socket
 import ipaddress
 import requests
+import argparse
 from scapy.layers.inet import IP, ICMP
 from scapy.sendrecv import sr1
+
+
+def options():
+    parser = argparse.ArgumentParser(description="Geo-locate each hop along a traceroute")
+    parser.add_argument('rhost', help="Remote machine ip or hostname")
+    return parser.parse_args()
 
 
 def ip_lookup(ip):
@@ -21,7 +28,7 @@ def ip_lookup(ip):
 
 def print_results(hops, reply, input_dict):
     try:
-        output = ('{:<2}''{:^12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
+        output = ('{:<2}' '{:^12}' '{:<18}' '{:<15}' '{:<14}' '{:<13}' '{:<10}' '{:<12}' '{:<14}'
                   ).format(hops, "hops away:",
                            info(reply),
                            info(input_dict['city']),
@@ -42,20 +49,21 @@ def trace_route(hostname):
     print(hostname)
     print("IP ", ip)
     header = ('{:<2}''{:<12}''{:<18}''{:<15}''{:<14}''{:<13}''{:<10}''{:<12}''{:<14}'
-              ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LONG", "COUNTRY")
+              ).format('', '', "IP", "CITY", "STATE", "ZIP", "LAT", "LON", "COUNTRY")
     print('\n', header)
     for i in range(1, 28):
         reply = sr1(IP(dst=sys.argv[1], ttl=i) / ICMP(id=os.getpid()), verbose=0)
         if reply is None:
             print("No Reply")
             break
+        elif reply.src == ip:
+            params = ip_lookup(reply.src) if not ipaddress.ip_address(reply.src) else "Priv IP"
+            print('\n', "We're here!", '\n', end=' ', flush=True)
+            print_results(i, reply.src, params)
+            break
         elif ipaddress.ip_address(reply.src).is_private:
             priv = "Priv IP"
             print_results(i, reply.src, priv)
-        elif reply.src == ip:
-            params = ip_lookup(reply.src)
-            print('\n', "We're here!", '\n', end=' ', flush=True)
-            print_results(i, reply.src, params)
         else:
             params = ip_lookup(reply.src)
             print_results(i, reply.src, params)
@@ -65,9 +73,10 @@ def info(n):
     return n if n else ''
 
 
-def main(ip_arg):
-    trace_route(ip_arg)
+def main():
+    args = options()
+    trace_route(args.rhost)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()
